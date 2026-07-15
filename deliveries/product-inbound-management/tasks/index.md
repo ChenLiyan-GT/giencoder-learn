@@ -1,0 +1,17 @@
+# 任务索引
+
+## 任务总览
+
+| 任务 ID | 任务名 | 依赖 | 状态 | 覆盖需求 |
+| --- | --- | --- | --- | --- |
+| TASK-001 | 商品主数据 CRUD | 无 | 待执行 | FUNC-016, FIELD-004, FIELD-009, RULE-020, NFR-009 |
+| TASK-002 | 库存管理 CRUD | TASK-001 | 待执行 | FUNC-013~015, FIELD-008, RULE-016~019 |
+| TASK-003 | 入库机能 | TASK-001, TASK-002 | 待执行 | FUNC-001~004, FIELD-005, RULE-001~005, FLOW-001, INT-001 |
+| TASK-004 | 出库机能 | TASK-001, TASK-002 | 待执行 | FUNC-009~012, FIELD-007, RULE-011~015, FLOW-003, INT-002 |
+| TASK-005 | 拣货机能 | TASK-001, TASK-002, TASK-004 | 待执行 | FUNC-005~008, FIELD-006, RULE-006~010, FLOW-002, INT-003 |
+| TASK-006 | 仓库调拨机能 | TASK-001, TASK-002 | 待执行 | FUNC-017~022, FIELD-010, RULE-021~026, FLOW-004, INT-006, INT-007 |
+| TASK-007 | 跨模块集成流程 | TASK-001~006 | 待执行 | INT-004, INT-005, FLOW-001~004 |
+
+## 执行顺序
+
+1. TASK-001 → 2. TASK-002 → 3. TASK-003 → 4. TASK-004 → 5. TASK-005 → 6. TASK-006 → 7. TASK-007
