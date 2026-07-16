@@ -4,28 +4,31 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "s103_outbound_order", schema = "scash")
-public class OutboundOrder {
+@Table(name = "s102_picking_order", schema = "scash")
+public class PickingOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "outbound_order_id")
-    private Long outboundOrderId;
+    @Column(name = "picking_order_id")
+    private Long pickingOrderId;
 
-    @Column(name = "outbound_order_cd", nullable = false, length = 50)
-    private String outboundOrderCd;
+    @Column(name = "picking_order_no", nullable = false, length = 20, unique = true)
+    private String pickingOrderNo;
 
-    @Column(name = "company_cd", nullable = false, length = 20)
-    private String companyCd;
+    @Column(name = "outbound_order_no", nullable = false, length = 20)
+    private String outboundOrderNo;
 
-    @Column(name = "product_cd", nullable = false, length = 50)
+    @Column(name = "product_cd", nullable = false, length = 20)
     private String productCd;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+    @Column(name = "picked_quantity", nullable = false)
+    private Integer pickedQuantity;
+
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // PENDING, SHIPPED, CANCELLED
+    private String status; // PENDING, PICKING, COMPLETED, CANCELLED
 
     @Version
     @Column(name = "version", nullable = false)
@@ -53,28 +56,28 @@ public class OutboundOrder {
     private String updatedProgram;
 
     // Getters and Setters
-    public Long getOutboundOrderId() {
-        return outboundOrderId;
+    public Long getPickingOrderId() {
+        return pickingOrderId;
     }
 
-    public void setOutboundOrderId(Long outboundOrderId) {
-        this.outboundOrderId = outboundOrderId;
+    public void setPickingOrderId(Long pickingOrderId) {
+        this.pickingOrderId = pickingOrderId;
     }
 
-    public String getOutboundOrderCd() {
-        return outboundOrderCd;
+    public String getPickingOrderNo() {
+        return pickingOrderNo;
     }
 
-    public void setOutboundOrderCd(String outboundOrderCd) {
-        this.outboundOrderCd = outboundOrderCd;
+    public void setPickingOrderNo(String pickingOrderNo) {
+        this.pickingOrderNo = pickingOrderNo;
     }
 
-    public String getCompanyCd() {
-        return companyCd;
+    public String getOutboundOrderNo() {
+        return outboundOrderNo;
     }
 
-    public void setCompanyCd(String companyCd) {
-        this.companyCd = companyCd;
+    public void setOutboundOrderNo(String outboundOrderNo) {
+        this.outboundOrderNo = outboundOrderNo;
     }
 
     public String getProductCd() {
@@ -91,6 +94,14 @@ public class OutboundOrder {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public Integer getPickedQuantity() {
+        return pickedQuantity;
+    }
+
+    public void setPickedQuantity(Integer pickedQuantity) {
+        this.pickedQuantity = pickedQuantity;
     }
 
     public String getStatus() {

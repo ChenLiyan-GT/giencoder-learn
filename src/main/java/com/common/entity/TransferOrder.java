@@ -4,28 +4,34 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "s103_outbound_order", schema = "scash")
-public class OutboundOrder {
+@Table(name = "s105_transfer_order", schema = "scash")
+public class TransferOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "outbound_order_id")
-    private Long outboundOrderId;
+    @Column(name = "transfer_order_id")
+    private Long transferOrderId;
 
-    @Column(name = "outbound_order_cd", nullable = false, length = 50)
-    private String outboundOrderCd;
+    @Column(name = "transfer_order_no", nullable = false, length = 20, unique = true)
+    private String transferOrderNo;
 
-    @Column(name = "company_cd", nullable = false, length = 20)
-    private String companyCd;
+    @Column(name = "from_company_cd", nullable = false, length = 10)
+    private String fromCompanyCd;
 
-    @Column(name = "product_cd", nullable = false, length = 50)
+    @Column(name = "to_company_cd", nullable = false, length = 10)
+    private String toCompanyCd;
+
+    @Column(name = "product_cd", nullable = false, length = 20)
     private String productCd;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+    @Column(name = "transferred_quantity", nullable = false)
+    private Integer transferredQuantity;
+
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // PENDING, SHIPPED, CANCELLED
+    private String status; // PENDING, APPROVED, SHIPPED, COMPLETED, CANCELLED
 
     @Version
     @Column(name = "version", nullable = false)
@@ -53,28 +59,36 @@ public class OutboundOrder {
     private String updatedProgram;
 
     // Getters and Setters
-    public Long getOutboundOrderId() {
-        return outboundOrderId;
+    public Long getTransferOrderId() {
+        return transferOrderId;
     }
 
-    public void setOutboundOrderId(Long outboundOrderId) {
-        this.outboundOrderId = outboundOrderId;
+    public void setTransferOrderId(Long transferOrderId) {
+        this.transferOrderId = transferOrderId;
     }
 
-    public String getOutboundOrderCd() {
-        return outboundOrderCd;
+    public String getTransferOrderNo() {
+        return transferOrderNo;
     }
 
-    public void setOutboundOrderCd(String outboundOrderCd) {
-        this.outboundOrderCd = outboundOrderCd;
+    public void setTransferOrderNo(String transferOrderNo) {
+        this.transferOrderNo = transferOrderNo;
     }
 
-    public String getCompanyCd() {
-        return companyCd;
+    public String getFromCompanyCd() {
+        return fromCompanyCd;
     }
 
-    public void setCompanyCd(String companyCd) {
-        this.companyCd = companyCd;
+    public void setFromCompanyCd(String fromCompanyCd) {
+        this.fromCompanyCd = fromCompanyCd;
+    }
+
+    public String getToCompanyCd() {
+        return toCompanyCd;
+    }
+
+    public void setToCompanyCd(String toCompanyCd) {
+        this.toCompanyCd = toCompanyCd;
     }
 
     public String getProductCd() {
@@ -91,6 +105,14 @@ public class OutboundOrder {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public Integer getTransferredQuantity() {
+        return transferredQuantity;
+    }
+
+    public void setTransferredQuantity(Integer transferredQuantity) {
+        this.transferredQuantity = transferredQuantity;
     }
 
     public String getStatus() {
