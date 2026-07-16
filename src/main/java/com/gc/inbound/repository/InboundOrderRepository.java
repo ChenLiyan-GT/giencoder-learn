@@ -9,8 +9,5 @@ import java.util.Optional;
 @Repository
 public interface InboundOrderRepository extends JpaRepository<InboundOrder, Long> {
     Optional<InboundOrder> findByInboundOrderCdAndDeletedFlag(String inboundOrderCd, String deletedFlag);
-    
-    default Optional<InboundOrder> findByInboundOrderCd(String inboundOrderCd) {
-        return findByInboundOrderCdAndDeletedFlag(inboundOrderCd, "0");
-    }
+    Optional<InboundOrder> findByInboundOrderCd(String inboundOrderCd);
 }

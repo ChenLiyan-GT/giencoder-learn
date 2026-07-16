@@ -32,10 +32,10 @@ public class InboundOrderService {
             throw new RuntimeException("商品代码不能为空");
         }
 
-        // 检查商品是否存在且未被删除
+        // 检查商品是否存在
         Product product = productRepository.findByProductCd(dto.getProductCd())
                 .orElseThrow(() -> new RuntimeException("商品不存在：" + dto.getProductCd()));
-        
+
         // 检查商品是否已被删除
         if ("1".equals(product.getDeletedFlag())) {
             throw new RuntimeException("商品已被删除：" + dto.getProductCd());
@@ -48,6 +48,7 @@ public class InboundOrderService {
 
         InboundOrder entity = new InboundOrder();
         entity.setInboundOrderCd(dto.getInboundOrderCd());
+        entity.setCompanyCd(dto.getCompanyCd());
         entity.setProductCd(dto.getProductCd());
         entity.setQuantity(dto.getQuantity());
         entity.setStatus("RECEIVED"); // 默认状态
@@ -72,6 +73,7 @@ public class InboundOrderService {
     private InboundOrderDTO toDTO(InboundOrder entity) {
         InboundOrderDTO dto = new InboundOrderDTO();
         dto.setInboundOrderCd(entity.getInboundOrderCd());
+        dto.setCompanyCd(entity.getCompanyCd());
         dto.setProductCd(entity.getProductCd());
         dto.setQuantity(entity.getQuantity());
         dto.setStatus(entity.getStatus());

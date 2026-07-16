@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS scash.s103_outbound_order CASCADE;
 DROP TABLE IF EXISTS scash.s101_inbound_order CASCADE;
 DROP TABLE IF EXISTS scash.a102_inventory CASCADE;
 DROP TABLE IF EXISTS scash.a101_product CASCADE;
@@ -59,6 +60,24 @@ CREATE TABLE IF NOT EXISTS scash.a102_inventory (
 CREATE TABLE IF NOT EXISTS scash.s101_inbound_order (
     inbound_order_id    BIGSERIAL       PRIMARY KEY,
     inbound_order_cd    VARCHAR(20)     NOT NULL UNIQUE,
+    company_cd          VARCHAR(20)     NOT NULL,
+    product_cd          VARCHAR(20)     NOT NULL,
+    quantity            INTEGER         NOT NULL DEFAULT 0,
+    status              VARCHAR(20)     NOT NULL,
+    created_ts          TIMESTAMP,
+    created_user_cd     VARCHAR(16),
+    created_program     VARCHAR(50),
+    updated_ts          TIMESTAMP,
+    updated_user_cd     VARCHAR(16),
+    updated_program     VARCHAR(50),
+    version             INTEGER         NOT NULL DEFAULT 0,
+    deleted_flag        VARCHAR(1)      NOT NULL DEFAULT '0'
+);
+
+CREATE TABLE IF NOT EXISTS scash.s103_outbound_order (
+    outbound_order_id   BIGSERIAL       PRIMARY KEY,
+    outbound_order_cd   VARCHAR(20)     NOT NULL UNIQUE,
+    company_cd          VARCHAR(20)     NOT NULL,
     product_cd          VARCHAR(20)     NOT NULL,
     quantity            INTEGER         NOT NULL DEFAULT 0,
     status              VARCHAR(20)     NOT NULL,

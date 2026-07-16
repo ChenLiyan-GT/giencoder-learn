@@ -48,8 +48,9 @@ class InboundOrderControllerTest {
         inboundOrderRepository.findByInboundOrderCd("IO002").ifPresent(i -> inboundOrderRepository.delete(i));
         inboundOrderRepository.findByInboundOrderCd("IO003").ifPresent(i -> inboundOrderRepository.delete(i));
         
-        // 确保有商品数据
+        // 清理并重新创建商品数据
         productRepository.findByProductCd("P001").ifPresent(p -> productRepository.delete(p));
+        productRepository.findByProductCd("P_DELETED").ifPresent(p -> productRepository.delete(p));
         Instant now = Instant.now();
         Product p1 = new Product();
         p1.setProductCd("P001");
@@ -63,6 +64,19 @@ class InboundOrderControllerTest {
         p1.setUpdatedUserCd("mock_user");
         p1.setUpdatedTs(now);
         productRepository.save(p1);
+
+        Product pDeleted = new Product();
+        pDeleted.setProductCd("P_DELETED");
+        pDeleted.setProductNmKanji("删除商品");
+        pDeleted.setProductNmKana("サクジョショウヒン");
+        pDeleted.setUnitCd("PCS");
+        pDeleted.setVersion(0);
+        pDeleted.setDeletedFlag("1");
+        pDeleted.setCreatedUserCd("mock_user");
+        pDeleted.setCreatedTs(now);
+        pDeleted.setUpdatedUserCd("mock_user");
+        pDeleted.setUpdatedTs(now);
+        productRepository.save(pDeleted);
     }
 
     @Test
@@ -70,6 +84,7 @@ class InboundOrderControllerTest {
     void shouldCreateInboundOrderWithReceivedStatus() {
         InboundOrderDTO request = new InboundOrderDTO();
         request.setInboundOrderCd("IO001");
+        request.setCompanyCd("C001");
         request.setProductCd("P001");
         request.setQuantity(100);
 
@@ -79,6 +94,7 @@ class InboundOrderControllerTest {
             () -> assertEquals(HttpStatus.CREATED, response.getStatusCode()),
             () -> assertNotNull(response.getBody()),
             () -> assertEquals("IO001", response.getBody().getInboundOrderCd()),
+            () -> assertEquals("C001", response.getBody().getCompanyCd()),
             () -> assertEquals("P001", response.getBody().getProductCd()),
             () -> assertEquals(100, response.getBody().getQuantity())
         );
@@ -90,6 +106,7 @@ class InboundOrderControllerTest {
         // 先创建一个入库单
         InboundOrderDTO request = new InboundOrderDTO();
         request.setInboundOrderCd("IO001");
+        request.setCompanyCd("C001");
         request.setProductCd("P001");
         request.setQuantity(100);
         restTemplate.postForEntity(baseUrl, request, InboundOrderDTO.class);
@@ -97,12 +114,13 @@ class InboundOrderControllerTest {
         // 尝试用相同单号创建
         InboundOrderDTO request2 = new InboundOrderDTO();
         request2.setInboundOrderCd("IO001");
+        request2.setCompanyCd("C001");
         request2.setProductCd("P001");
         request2.setQuantity(50);
 
-        ResponseEntity<InboundOrderDTO> response = restTemplate.postForEntity(baseUrl, request2, InboundOrderDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request2, String.class);
 
-        assertNotEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -111,6 +129,7 @@ class InboundOrderControllerTest {
         // 先创建测试数据
         InboundOrderDTO request = new InboundOrderDTO();
         request.setInboundOrderCd("IO001");
+        request.setCompanyCd("C001");
         request.setProductCd("P001");
         request.setQuantity(100);
         restTemplate.postForEntity(baseUrl, request, InboundOrderDTO.class);
@@ -121,6 +140,7 @@ class InboundOrderControllerTest {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
             () -> assertNotNull(response.getBody()),
             () -> assertEquals("IO001", response.getBody().getInboundOrderCd()),
+            () -> assertEquals("C001", response.getBody().getCompanyCd()),
             () -> assertEquals("P001", response.getBody().getProductCd()),
             () -> assertEquals(100, response.getBody().getQuantity())
         );
@@ -129,41 +149,22 @@ class InboundOrderControllerTest {
     @Test
     @DisplayName("VP-013: 查询不存在的入库单返回 404")
     void shouldReturn404WhenInboundOrderNotFound() {
-        ResponseEntity<InboundOrderDTO> response = restTemplate.getForEntity(baseUrl + "/IO999", InboundOrderDTO.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl + "/IO999", String.class);
 
-        assertAll(
-            () -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()),
-            () -> assertNull(response.getBody())
-        );
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     @DisplayName("VP-014: 删除的商品不能入库")
     void shouldFailWhenProductIsDeleted() {
-        // 创建一个已删除的商品
-        Instant now = Instant.now();
-        Product deletedProduct = new Product();
-        deletedProduct.setProductCd("P_DELETED");
-        deletedProduct.setProductNmKanji("已删除商品");
-        deletedProduct.setProductNmKana("サクレショウヒン");
-        deletedProduct.setUnitCd("PCS");
-        deletedProduct.setVersion(0);
-        deletedProduct.setDeletedFlag("1"); // 已删除
-        deletedProduct.setCreatedUserCd("mock_user");
-        deletedProduct.setCreatedTs(now);
-        deletedProduct.setUpdatedUserCd("mock_user");
-        deletedProduct.setUpdatedTs(now);
-        productRepository.save(deletedProduct);
-
-        // 尝试为已删除的商品创建入库单
         InboundOrderDTO request = new InboundOrderDTO();
-        request.setInboundOrderCd("IO001");
+        request.setInboundOrderCd("IO002");
+        request.setCompanyCd("C001");
         request.setProductCd("P_DELETED");
-        request.setQuantity(100);
+        request.setQuantity(50);
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request, String.class);
 
-        // 验证返回 500 错误（RuntimeException 导致）
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }

@@ -2,11 +2,11 @@
 
 ## 覆盖需求
 
-FUNC-016, FIELD-004, FIELD-009, RULE-020, NFR-009, BR-001
+FUNC-001 ~ FUNC-003, FIELD-001 ~ FIELD-003, RULE-001 ~ RULE-003, NFR-001, BR-001
 
 ## 验证用例
 
-VP-001 ~ VP-009
+VP-001 ~ VP-010
 
 ## 依赖
 
@@ -55,7 +55,7 @@ commands_run:
     command: mvn test -Dtest=ProductControllerTest
     exit_code: 0
     result: passed
-    output_summary: Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+    output_summary: Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
 tdd_red_result:
   cwd: D:/giencoder/giencoder-learn_github
   command: mvn test -Dtest=ProductControllerTest
@@ -68,7 +68,7 @@ tdd_green_result:
   command: mvn test -Dtest=ProductControllerTest
   exit_code: 0
   result: passed
-  output_summary: Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+  output_summary: Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
 additional_checks:
   - mvn clean compile: BUILD SUCCESS
 requirement_ids_covered:
@@ -87,5 +87,5 @@ remaining_risks: []
 
 ✅ **TASK-001 已完成**
 - 所有 TDD 步骤已完成并有证据
-- 所有测试用例通过（9/9）
+- 所有测试用例通过（11/11）
 - 代码已实现并验证

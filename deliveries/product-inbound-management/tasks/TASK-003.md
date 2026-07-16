@@ -53,18 +53,19 @@ TASK-002（Inventory Entity & Service）✅ 已完成
 
 ### Step 4: 运行绿灯验证 ✅
 
-- 执行 `mvn clean test -Dtest=InboundOrderControllerTest`
-- 结果：Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
-- VP-010~VP-014 全部通过
+- 执行 `mvn clean test -Dtest=InboundOrderControllerTest,OutboundOrderControllerTest`
+- 结果：Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+- VP-010~VP-014, VP-035~VP-039 全部通过
+- 添加全局异常处理器：`src/main/java/com/common/controller/GlobalExceptionHandler.java`
 
-### Step 5: 补充确认/拒绝/库存集成测试
+### Step 5: 补充确认/拒绝/库存集成测试 ⏳
 
 - 确认入库→库存增加（VP-015, VP-016）
 - 拒绝入库→库存不变（VP-017）
 - 已确认/已拒绝不可再操作（VP-018~020）
 - 异常场景测试（VP-021）
 
-### Step 6: 运行完整绿灯验证
+### Step 6: 运行完整绿灯验证 ⏳
 
 - 执行 `mvn test -Dtest=InboundOrderControllerTest`，确认全部通过
 
@@ -79,20 +80,21 @@ changed_files:
   - src/main/java/com/gc/inbound/controller/InboundOrderController.java
   - src/test/java/com/gc/inbound/controller/InboundOrderControllerTest.java
   - src/test/resources/schema.sql
+  - src/main/java/com/common/controller/GlobalExceptionHandler.java
 tests_added_or_changed:
   - src/test/java/com/gc/inbound/controller/InboundOrderControllerTest.java
 commands_run:
   - cwd: D:/giencoder/giencoder-learn_github
-    command: mvn clean test -Dtest=InboundOrderControllerTest
+    command: mvn clean test -Dtest=InboundOrderControllerTest,OutboundOrderControllerTest
     exit_code: 0
     result: PASS
-    output_summary: Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+    output_summary: Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
 tdd_green_result:
   cwd: D:/giencoder/giencoder-learn_github
-  command: mvn clean test -Dtest=InboundOrderControllerTest
+  command: mvn clean test -Dtest=InboundOrderControllerTest,OutboundOrderControllerTest
   exit_code: 0
   result: PASS
-  output_summary: Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+  output_summary: Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
 additional_checks:
   - 商品存在性检查：已实现
   - 删除商品检查：已实现

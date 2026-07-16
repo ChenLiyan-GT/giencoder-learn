@@ -1,20 +1,20 @@
-package com.gc.inbound.dto;
+package com.gc.outbound.dto;
 
-public class InboundOrderDTO {
+public class OutboundOrderDTO {
 
-    private String inboundOrderCd;
+    private String outboundOrderCd;
     private String companyCd;
     private String productCd;
     private Integer quantity;
     private String status;
 
     // Getters and Setters
-    public String getInboundOrderCd() {
-        return inboundOrderCd;
+    public String getOutboundOrderCd() {
+        return outboundOrderCd;
     }
 
-    public void setInboundOrderCd(String inboundOrderCd) {
-        this.inboundOrderCd = inboundOrderCd;
+    public void setOutboundOrderCd(String outboundOrderCd) {
+        this.outboundOrderCd = outboundOrderCd;
     }
 
     public String getCompanyCd() {

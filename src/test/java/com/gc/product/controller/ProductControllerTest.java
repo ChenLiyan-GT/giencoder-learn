@@ -125,7 +125,7 @@ class ProductControllerTest {
         request.setProductCd("P001");
         request.setProductNmKanji("重复商品");
 
-        ResponseEntity<ProductDTO> response = restTemplate.postForEntity(baseUrl, request, ProductDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request, String.class);
 
         assertNotEquals(HttpStatus.CREATED, response.getStatusCode());
     }
@@ -199,7 +199,7 @@ class ProductControllerTest {
         request.setProductCd("");
         request.setProductNmKanji("空代码商品");
 
-        ResponseEntity<ProductDTO> response = restTemplate.postForEntity(baseUrl, request, ProductDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request, String.class);
 
         assertNotEquals(HttpStatus.CREATED, response.getStatusCode());
     }
@@ -211,7 +211,7 @@ class ProductControllerTest {
         request.setProductCd("P".repeat(21));
         request.setProductNmKanji("超长代码商品");
 
-        ResponseEntity<ProductDTO> response = restTemplate.postForEntity(baseUrl, request, ProductDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request, String.class);
 
         assertNotEquals(HttpStatus.CREATED, response.getStatusCode());
     }
@@ -223,7 +223,7 @@ class ProductControllerTest {
         request.setProductCd("P005");
         request.setProductNmKanji("");
 
-        ResponseEntity<ProductDTO> response = restTemplate.postForEntity(baseUrl, request, ProductDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request, String.class);
 
         assertNotEquals(HttpStatus.CREATED, response.getStatusCode());
     }

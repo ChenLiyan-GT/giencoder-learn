@@ -15,6 +15,9 @@ public class InboundOrder {
     @Column(name = "inbound_order_cd", nullable = false, unique = true, length = 20)
     private String inboundOrderCd;
 
+    @Column(name = "company_cd", nullable = false, length = 20)
+    private String companyCd;
+
     @Column(name = "product_cd", nullable = false, length = 20)
     private String productCd;
 
@@ -55,6 +58,9 @@ public class InboundOrder {
 
     public String getInboundOrderCd() { return inboundOrderCd; }
     public void setInboundOrderCd(String inboundOrderCd) { this.inboundOrderCd = inboundOrderCd; }
+
+    public String getCompanyCd() { return companyCd; }
+    public void setCompanyCd(String companyCd) { this.companyCd = companyCd; }
 
     public String getProductCd() { return productCd; }
     public void setProductCd(String productCd) { this.productCd = productCd; }
