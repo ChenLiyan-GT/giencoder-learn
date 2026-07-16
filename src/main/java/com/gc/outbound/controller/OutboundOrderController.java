@@ -25,4 +25,22 @@ public class OutboundOrderController {
         OutboundOrderDTO dto = outboundOrderService.get(outboundOrderCd);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+    /**
+     * 确认出库（发货）
+     */
+    @PostMapping("/{outboundOrderCd}/ship")
+    public ResponseEntity<OutboundOrderDTO> ship(@PathVariable String outboundOrderCd) {
+        OutboundOrderDTO dto = outboundOrderService.ship(outboundOrderCd);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    /**
+     * 取消出库
+     */
+    @PostMapping("/{outboundOrderCd}/cancel")
+    public ResponseEntity<OutboundOrderDTO> cancel(@PathVariable String outboundOrderCd) {
+        OutboundOrderDTO dto = outboundOrderService.cancel(outboundOrderCd);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
 }

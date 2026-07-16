@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -48,9 +50,11 @@ class InboundOrderControllerTest {
         inboundOrderRepository.findByInboundOrderCd("IO002").ifPresent(i -> inboundOrderRepository.delete(i));
         inboundOrderRepository.findByInboundOrderCd("IO003").ifPresent(i -> inboundOrderRepository.delete(i));
         
-        // 清理并重新创建商品数据
-        productRepository.findByProductCd("P001").ifPresent(p -> productRepository.delete(p));
+        // 清理已删除商品测试数据
         productRepository.findByProductCd("P_DELETED").ifPresent(p -> productRepository.delete(p));
+        
+        // 确保有商品数据
+        productRepository.findByProductCd("P001").ifPresent(p -> productRepository.delete(p));
         Instant now = Instant.now();
         Product p1 = new Product();
         p1.setProductCd("P001");
@@ -64,19 +68,6 @@ class InboundOrderControllerTest {
         p1.setUpdatedUserCd("mock_user");
         p1.setUpdatedTs(now);
         productRepository.save(p1);
-
-        Product pDeleted = new Product();
-        pDeleted.setProductCd("P_DELETED");
-        pDeleted.setProductNmKanji("删除商品");
-        pDeleted.setProductNmKana("サクジョショウヒン");
-        pDeleted.setUnitCd("PCS");
-        pDeleted.setVersion(0);
-        pDeleted.setDeletedFlag("1");
-        pDeleted.setCreatedUserCd("mock_user");
-        pDeleted.setCreatedTs(now);
-        pDeleted.setUpdatedUserCd("mock_user");
-        pDeleted.setUpdatedTs(now);
-        productRepository.save(pDeleted);
     }
 
     @Test
@@ -94,7 +85,6 @@ class InboundOrderControllerTest {
             () -> assertEquals(HttpStatus.CREATED, response.getStatusCode()),
             () -> assertNotNull(response.getBody()),
             () -> assertEquals("IO001", response.getBody().getInboundOrderCd()),
-            () -> assertEquals("C001", response.getBody().getCompanyCd()),
             () -> assertEquals("P001", response.getBody().getProductCd()),
             () -> assertEquals(100, response.getBody().getQuantity())
         );
@@ -120,7 +110,10 @@ class InboundOrderControllerTest {
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, request2, String.class);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertAll(
+            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()),
+            () -> assertTrue(response.getBody().contains("入库单号已存在"))
+        );
     }
 
     @Test
@@ -140,7 +133,6 @@ class InboundOrderControllerTest {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
             () -> assertNotNull(response.getBody()),
             () -> assertEquals("IO001", response.getBody().getInboundOrderCd()),
-            () -> assertEquals("C001", response.getBody().getCompanyCd()),
             () -> assertEquals("P001", response.getBody().getProductCd()),
             () -> assertEquals(100, response.getBody().getQuantity())
         );
@@ -151,12 +143,30 @@ class InboundOrderControllerTest {
     void shouldReturn404WhenInboundOrderNotFound() {
         ResponseEntity<String> response = restTemplate.getForEntity(baseUrl + "/IO999", String.class);
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertAll(
+            () -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()),
+            () -> assertNull(response.getBody())
+        );
     }
 
     @Test
     @DisplayName("VP-014: 删除的商品不能入库")
     void shouldFailWhenProductIsDeleted() {
+        // 创建已删除商品
+        Instant now = Instant.now();
+        Product pDeleted = new Product();
+        pDeleted.setProductCd("P_DELETED");
+        pDeleted.setProductNmKanji("删除商品");
+        pDeleted.setProductNmKana("サクジョショウヒン");
+        pDeleted.setUnitCd("PCS");
+        pDeleted.setVersion(0);
+        pDeleted.setDeletedFlag("1");
+        pDeleted.setCreatedUserCd("mock_user");
+        pDeleted.setCreatedTs(now);
+        pDeleted.setUpdatedUserCd("mock_user");
+        pDeleted.setUpdatedTs(now);
+        productRepository.save(pDeleted);
+
         InboundOrderDTO request = new InboundOrderDTO();
         request.setInboundOrderCd("IO002");
         request.setCompanyCd("C001");

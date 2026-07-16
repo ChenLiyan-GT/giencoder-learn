@@ -60,6 +60,12 @@ public class OutboundOrderService {
             throw new RuntimeException("库存不足：可用库存=" + inventory.getAvailableQuantity() + ", 请求数量=" + dto.getQuantity());
         }
 
+        // 预占库存
+        inventory.setReservedQuantity(inventory.getReservedQuantity() + dto.getQuantity());
+        inventory.setUpdatedTs(Instant.now());
+        inventory.setUpdatedUserCd("system");
+        inventoryRepository.save(inventory);
+
         OutboundOrder entity = new OutboundOrder();
         entity.setOutboundOrderCd(dto.getOutboundOrderCd());
         entity.setCompanyCd(companyCd);
@@ -82,6 +88,72 @@ public class OutboundOrderService {
         OutboundOrder entity = outboundOrderRepository.findByOutboundOrderCd(outboundOrderCd)
                 .orElseThrow(() -> new RuntimeException("出库单不存在：" + outboundOrderCd));
         return toDTO(entity);
+    }
+
+    /**
+     * 确认出库（发货）- 状态变更为 SHIPPED，同时扣减库存
+     */
+    public OutboundOrderDTO ship(String outboundOrderCd) {
+        OutboundOrder entity = outboundOrderRepository.findByOutboundOrderCd(outboundOrderCd)
+                .orElseThrow(() -> new RuntimeException("出库单不存在：" + outboundOrderCd));
+
+        // 检查状态是否为 PENDING
+        if (!"PENDING".equals(entity.getStatus())) {
+            throw new RuntimeException("不能发货：出库单状态必须为 PENDING");
+        }
+
+        // 更新状态
+        entity.setStatus("SHIPPED");
+        entity.setUpdatedTs(Instant.now());
+        entity.setUpdatedUserCd("system");
+
+        // 扣减库存（同时释放预占）
+        Inventory inventory = inventoryRepository.findByCompanyCdAndProductCdAndDeletedFlag(
+                entity.getCompanyCd(), entity.getProductCd(), "0")
+                .orElseThrow(() -> new RuntimeException("库存不存在：" + entity.getProductCd()));
+
+        // 扣减实际库存数量
+        inventory.setQuantity(inventory.getQuantity() - entity.getQuantity());
+        // 释放预占数量
+        inventory.setReservedQuantity(inventory.getReservedQuantity() - entity.getQuantity());
+        inventory.setUpdatedTs(Instant.now());
+        inventory.setUpdatedUserCd("system");
+
+        inventoryRepository.save(inventory);
+        OutboundOrder updated = outboundOrderRepository.save(entity);
+        return toDTO(updated);
+    }
+
+    /**
+     * 取消出库 - 状态变更为 CANCELLED，同时释放预占库存
+     */
+    public OutboundOrderDTO cancel(String outboundOrderCd) {
+        OutboundOrder entity = outboundOrderRepository.findByOutboundOrderCd(outboundOrderCd)
+                .orElseThrow(() -> new RuntimeException("出库单不存在：" + outboundOrderCd));
+
+        // 检查状态是否为 PENDING
+        if (!"PENDING".equals(entity.getStatus())) {
+            throw new RuntimeException("不能取消：出库单状态必须为 PENDING");
+        }
+
+        // 更新状态
+        entity.setStatus("CANCELLED");
+        entity.setUpdatedTs(Instant.now());
+        entity.setUpdatedUserCd("system");
+
+        // 释放预占库存
+        Inventory inventory = inventoryRepository.findByCompanyCdAndProductCdAndDeletedFlag(
+                entity.getCompanyCd(), entity.getProductCd(), "0")
+                .orElseThrow(() -> new RuntimeException("库存不存在：" + entity.getProductCd()));
+
+        // 释放预占数量
+        inventory.setReservedQuantity(inventory.getReservedQuantity() - entity.getQuantity());
+        inventory.setUpdatedTs(Instant.now());
+        inventory.setUpdatedUserCd("system");
+
+        inventoryRepository.save(inventory);
+        OutboundOrder updated = outboundOrderRepository.save(entity);
+        return toDTO(updated);
     }
 
     private OutboundOrderDTO toDTO(OutboundOrder entity) {

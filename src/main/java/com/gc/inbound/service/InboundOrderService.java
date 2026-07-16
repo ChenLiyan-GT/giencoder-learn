@@ -1,9 +1,11 @@
 package com.gc.inbound.service;
 
 import com.common.entity.InboundOrder;
+import com.common.entity.Inventory;
 import com.common.entity.Product;
 import com.gc.inbound.dto.InboundOrderDTO;
 import com.gc.inbound.repository.InboundOrderRepository;
+import com.gc.inventory.repository.InventoryRepository;
 import com.gc.product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,9 @@ public class InboundOrderService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private InventoryRepository inventoryRepository;
 
     public InboundOrderDTO create(InboundOrderDTO dto) {
         // 检查单号是否重复
@@ -68,6 +73,73 @@ public class InboundOrderService {
         InboundOrder entity = inboundOrderRepository.findByInboundOrderCd(inboundOrderCd)
                 .orElseThrow(() -> new RuntimeException("入库单不存在：" + inboundOrderCd));
         return toDTO(entity);
+    }
+
+    /**
+     * 确认入库 - 状态变更为 CONFIRMED，同时增加库存
+     */
+    public InboundOrderDTO confirm(String inboundOrderCd) {
+        InboundOrder entity = inboundOrderRepository.findByInboundOrderCd(inboundOrderCd)
+                .orElseThrow(() -> new RuntimeException("入库单不存在：" + inboundOrderCd));
+
+        // 检查状态是否为 RECEIVED
+        if (!"RECEIVED".equals(entity.getStatus())) {
+            throw new RuntimeException("只有 RECEIVED 状态的入库单才能确认");
+        }
+
+        // 更新状态
+        entity.setStatus("CONFIRMED");
+        entity.setUpdatedTs(Instant.now());
+        entity.setUpdatedUserCd("system");
+
+        // 增加库存
+        Inventory inventory = inventoryRepository.findByCompanyCdAndProductCdAndDeletedFlag(
+                entity.getCompanyCd(), entity.getProductCd(), "0").orElse(null);
+
+        if (inventory == null) {
+            // 创建新的库存记录
+            inventory = new Inventory();
+            inventory.setCompanyCd(entity.getCompanyCd());
+            inventory.setProductCd(entity.getProductCd());
+            inventory.setQuantity(entity.getQuantity());
+            inventory.setReservedQuantity(0);
+            inventory.setVersion(0);
+            inventory.setDeletedFlag("0");
+            inventory.setCreatedUserCd("system");
+            inventory.setCreatedTs(Instant.now());
+            inventory.setUpdatedUserCd("system");
+            inventory.setUpdatedTs(Instant.now());
+        } else {
+            // 更新现有库存
+            inventory.setQuantity(inventory.getQuantity() + entity.getQuantity());
+            inventory.setUpdatedTs(Instant.now());
+            inventory.setUpdatedUserCd("system");
+        }
+
+        inventoryRepository.save(inventory);
+        InboundOrder updated = inboundOrderRepository.save(entity);
+        return toDTO(updated);
+    }
+
+    /**
+     * 拒绝入库 - 状态变更为 REJECTED，库存不变
+     */
+    public InboundOrderDTO reject(String inboundOrderCd) {
+        InboundOrder entity = inboundOrderRepository.findByInboundOrderCd(inboundOrderCd)
+                .orElseThrow(() -> new RuntimeException("入库单不存在：" + inboundOrderCd));
+
+        // 检查状态是否为 RECEIVED
+        if (!"RECEIVED".equals(entity.getStatus())) {
+            throw new RuntimeException("只有 RECEIVED 状态的入库单才能拒绝");
+        }
+
+        // 更新状态
+        entity.setStatus("REJECTED");
+        entity.setUpdatedTs(Instant.now());
+        entity.setUpdatedUserCd("system");
+
+        InboundOrder updated = inboundOrderRepository.save(entity);
+        return toDTO(updated);
     }
 
     private InboundOrderDTO toDTO(InboundOrder entity) {
